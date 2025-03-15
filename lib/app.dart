@@ -24,8 +24,8 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     //toast提示必须为APP的顶层组件
     return OKToast(
-      //屏幕适配父组件组件
-    child: ScreenUtilInit(
+        //屏幕适配父组件组件
+        child: ScreenUtilInit(
       designSize: designSize,
       builder: (context, child) {
         return MaterialApp(

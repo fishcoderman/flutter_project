@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 // import 'package:demo_flutter/pages/search/search_page.dart';
 
 import 'package:project/pages/tab_page.dart';
+import "package:project/pages/home/home_list_page.dart";
 
 ///路由注册管理类
 class Routes {
@@ -17,6 +18,8 @@ class Routes {
     switch (settings.name) {
       case RoutePath.tab:
       return pageRoute(const TabPage(), settings: settings);
+      case RoutePath.home:
+        return pageRoute(const HomeListPage(), settings: settings);
       // //首页tab
       // case RoutePath.tab:
       //   return pageRoute(const TabPage(), settings: settings);
@@ -70,6 +73,9 @@ class Routes {
 class RoutePath {
   //首页tab
   static const String tab = "/";
+
+  //home
+  static const String home = "/home";
 
   //登录
   static const String login = "/login";
