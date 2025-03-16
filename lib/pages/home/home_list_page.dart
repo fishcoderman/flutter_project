@@ -4,6 +4,10 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_swiper_view/flutter_swiper_view.dart';
 import 'package:project/pages/home/web_view_page.dart';
 
+import '../../repository/api/wan_api.dart';
+import '../../repository/model/home_banner_model.dart';
+import '../../repository/model/home_list_model.dart';
+
 class HomeListPage extends StatefulWidget {
   const HomeListPage({super.key});
 
@@ -12,11 +16,33 @@ class HomeListPage extends StatefulWidget {
 }
 
 class _HomeListPageState extends State<HomeListPage> {
+  List<HomeBannerModel?>? bannerList;
+  List<HomeListItemData?>? articleList;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // 使用 Future.wait 同时等待两个异步操作
+    Future.wait([getBannerData(), getArticleList()]).then((_) {
+      setState(() {});
+    });
+  }
+
+  Future<void> getArticleList() async {
+    final value = await WanApi.instance().homeList('1');
+    articleList = value?.datas;
+  }
+
+  Future<void> getBannerData() async {
+    bannerList = await WanApi.instance().bannerList();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         backgroundColor: Colors.white,
-        appBar: AppBar(title: const Text("home")),
+        appBar: AppBar(title: const Text("Hello Flutter")),
         body: SafeArea(
             child: SingleChildScrollView(
           child: Column(
@@ -27,14 +53,16 @@ class _HomeListPageState extends State<HomeListPage> {
                 child: Swiper(
                   itemBuilder: (context, index) {
                     return Container(
-                      height: 150.h,
-                      color: Colors.deepOrangeAccent,
-                    );
+                        height: 150.h,
+                        color: Colors.deepOrangeAccent,
+                        child: Image.network(
+                            bannerList?[index]?.imagePath ?? '',
+                            fit: BoxFit.fill));
                   },
                   indicatorLayout: PageIndicatorLayout.NONE,
                   pagination: const SwiperPagination(),
                   autoplay: true,
-                  itemCount: 5,
+                  itemCount: bannerList?.length ?? 0,
                   control: const SwiperControl(),
                 ),
               ),
@@ -44,13 +72,14 @@ class _HomeListPageState extends State<HomeListPage> {
                 itemBuilder: (context, index) {
                   return GestureDetector(
                       onTap: () {
-                        Navigator.push(context, MaterialPageRoute(builder: (context) {
+                        Navigator.push(context,
+                            MaterialPageRoute(builder: (context) {
                           return WebViewPage(title: "hello world ${index + 1}");
                         }));
                       },
                       child: _listItemView(index));
                 },
-                itemCount: 16,
+                itemCount: articleList?.length ?? 0,
               )
             ],
           ),
@@ -58,8 +87,10 @@ class _HomeListPageState extends State<HomeListPage> {
   }
 
   Widget _listItemView(int index) {
+    var artical = articleList?[index];
     return Container(
-        padding: EdgeInsets.only(top: 8.h, bottom: 8.h, left: 10.w, right: 10.w),
+        padding:
+            EdgeInsets.only(top: 8.h, bottom: 8.h, left: 10.w, right: 10.w),
         margin: EdgeInsets.only(top: 8.h, bottom: 8.h, left: 10.w, right: 10.w),
         decoration: BoxDecoration(
             border: Border.all(color: Colors.black12, width: 0.5.r),
@@ -76,24 +107,32 @@ class _HomeListPageState extends State<HomeListPage> {
                   height: 20.r,
                 ),
                 Padding(
-                    padding: EdgeInsets.symmetric(vertical: 0, horizontal: 6.w), child: Text("作者")),
+                    padding: EdgeInsets.symmetric(vertical: 0, horizontal: 6.w),
+                    child: Text(artical?.author ?? '')),
                 const Expanded(child: SizedBox()),
-                const Text("2025-12-25 20:55:56"),
+                Text(artical?.niceShareDate ?? ''),
                 SizedBox(width: 8.w),
                 const Text(
                   "顶置",
-                  style: TextStyle(color: Colors.blueAccent, fontWeight: FontWeight.w600),
+                  style: TextStyle(
+                      color: Colors.blueAccent, fontWeight: FontWeight.w600),
                 ),
               ],
             ),
             Container(
-                margin: EdgeInsets.symmetric(vertical: 6.h),
-                child: const Text("标题的内容为阿克苏电话费啊看到回复杰卡斯东方红看见啊好的复活卡健身房等哈看到回复卡收到回复")),
+                width: double.infinity,
+                margin: EdgeInsets.symmetric(vertical: 10.h),
+                child: Text(
+                  artical?.title ?? '',
+                  textAlign: TextAlign.left,
+                )),
             Row(
               children: [
                 Text("干货资源",
                     style: TextStyle(
-                        color: Colors.green, fontSize: 13.sp, fontWeight: FontWeight.w600)),
+                        color: Colors.green,
+                        fontSize: 13.sp,
+                        fontWeight: FontWeight.w600)),
                 const Expanded(child: SizedBox()),
                 Image.asset(
                   "assets/images/img_collect_grey.png",
